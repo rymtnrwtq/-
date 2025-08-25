@@ -149,9 +149,13 @@
             color: #856404;
             padding: 20px;
             border-radius: 10px;
-            text-align: center;
+            text-align: left;
             margin-top: 20px;
             display: none;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
         .loading {
@@ -301,7 +305,7 @@
     <script>
         // Настройки Telegram бота
         const TELEGRAM_BOT_TOKEN = '8299176792:AAGjAJn3IIrmrHNU9O_EGX5dhrHrmF_LGrk';
-        const TELEGRAM_CHAT_ID = '7802251986';
+        const TELEGRAM_CHAT_ID = '7802251986'; // Ваш личный ID
 
         // Установка минимальной даты на завтра
         const today = new Date();
@@ -313,8 +317,6 @@
         // Функция отправки сообщения в Telegram
         async function sendToTelegram(message) {
             const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-            
-            console.log('Отправка сообщения:', { url, chat_id: TELEGRAM_CHAT_ID, message });
             
             try {
                 const response = await fetch(url, {
@@ -329,18 +331,13 @@
                     })
                 });
                 
-                console.log('Ответ сервера:', response.status, response.statusText);
-                
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('Ошибка ответа:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
                 }
                 
                 const data = await response.json();
-                console.log('Успешный ответ:', data);
-                
-                return true;
+                return data.ok;
             } catch (error) {
                 console.error('Ошибка отправки:', error);
                 return false;
@@ -405,16 +402,6 @@ ${formData.get('appComment') || 'Нет комментариев'}`;
             }, 5000);
         }
 
-        // Показать отладочное сообщение
-        function showDebugMessage(message) {
-            const debugElement = document.getElementById('debugMessage');
-            debugElement.innerHTML = `🐛 ${message}`;
-            debugElement.style.display = 'block';
-            setTimeout(() => {
-                debugElement.style.display = 'none';
-            }, 5000);
-        }
-
         // Обработка формы вопроса
         document.getElementById('questionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -424,12 +411,9 @@ ${formData.get('appComment') || 'Нет комментариев'}`;
             btn.textContent = 'Отправка...';
             
             showLoading();
-            showDebugMessage('Подготовка данных для отправки...');
             
             const formData = new FormData(this);
             const message = formatQuestionData(formData);
-            
-            showDebugMessage('Отправка сообщения в Telegram...');
             const success = await sendToTelegram(message);
             
             hideLoading();
@@ -438,10 +422,8 @@ ${formData.get('appComment') || 'Нет комментариев'}`;
                 showSuccessMessage();
                 this.reset();
                 document.getElementById('date').value = dateString;
-                showDebugMessage('Сообщение успешно отправлено!');
             } else {
                 showErrorMessage();
-                showDebugMessage('Ошибка отправки сообщения!');
             }
             
             btn.disabled = false;
@@ -457,12 +439,9 @@ ${formData.get('appComment') || 'Нет комментариев'}`;
             btn.textContent = 'Отправка...';
             
             showLoading();
-            showDebugMessage('Подготовка данных для отправки...');
             
             const formData = new FormData(this);
             const message = formatApplicationData(formData);
-            
-            showDebugMessage('Отправка сообщения в Telegram...');
             const success = await sendToTelegram(message);
             
             hideLoading();
@@ -470,10 +449,8 @@ ${formData.get('appComment') || 'Нет комментариев'}`;
             if (success) {
                 showSuccessMessage();
                 this.reset();
-                showDebugMessage('Сообщение успешно отправлено!');
             } else {
                 showErrorMessage();
-                showDebugMessage('Ошибка отправки сообщения!');
             }
             
             btn.disabled = false;
@@ -483,17 +460,6 @@ ${formData.get('appComment') || 'Нет комментариев'}`;
         // Проверка токена бота при загрузке страницы
         window.addEventListener('load', async function() {
             console.log('Проверка токена бота...');
-            try {
-                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getMe`);
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Бот активен:', data.result.username);
-                } else {
-                    console.error('Ошибка проверки токена:', response.status);
-                }
-            } catch (error) {
-                console.error('Ошибка проверки токена:', error);
-            }
         });
     </script>
 </body>
