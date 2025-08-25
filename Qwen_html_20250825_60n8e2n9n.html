@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>#ВопросДня</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-title {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .required {
+            color: #e53e3e;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .success-message {
+            background: #48bb78;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: #e53e3e;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .debug-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 30px;
+        }
+
+        .info-box h3 {
+            color: #2b6cb0;
+            margin-bottom: 10px;
+        }
+
+        .info-box ul {
+            padding-left: 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>#ВопросДня</h1>
+        <p class="subtitle">Один день — один вопрос. Делись опытом и узнавай новое!</p>
+
+        <div class="info-box">
+            <h3>Как это работает:</h3>
+            <ul>
+                <li>Каждый день один участник задаёт вопрос</li>
+                <li>Остальные отвечают в течение дня</li>
+                <li>Вечером автор подводит итоги</li>
+                <li>Очередность по списку или договорённости</li>
+            </ul>
+        </div>
+
+        <!-- Форма подачи вопроса -->
+        <div class="form-section">
+            <h2 class="form-title">📝 Задать вопрос дня</h2>
+            <form id="questionForm">
+                <div class="form-group">
+                    <label for="author">Ваше имя <span class="required">*</span></label>
+                    <input type="text" id="author" name="author" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="question">Вопрос (1–2 предложения) <span class="required">*</span></label>
+                    <textarea id="question" name="question" placeholder="Например: Как вы справлялись с тревожностью перед началом учёбы?" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="context">Контекст (зачем вам это нужно) <span class="required">*</span></label>
+                    <textarea id="context" name="context" placeholder="Например: Готовлюсь к ВУЗу, немного боюсь нагрузки." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="expectation">Что вы хотите услышать от других? <span class="required">*</span></label>
+                    <textarea id="expectation" name="expectation" placeholder="Например: Личный опыт, советы, что помогло" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Дата, на которую назначается вопрос</label>
+                    <input type="date" id="date" name="date">
+                </div>
+
+                <button type="submit" class="btn" id="questionBtn">Отправить вопрос</button>
+            </form>
+        </div>
+
+        <!-- Форма подачи заявки -->
+        <div class="form-section">
+            <h2 class="form-title">📋 Подать заявку в очередь</h2>
+            <form id="applicationForm">
+                <div class="form-group">
+                    <label for="appAuthor">Ваше имя <span class="required">*</span></label>
+                    <input type="text" id="appAuthor" name="appAuthor" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="appEmail">Email (для уведомлений)</label>
+                    <input type="email" id="appEmail" name="appEmail">
+                </div>
+
+                <div class="form-group">
+                    <label for="appComment">Комментарий (по желанию)</label>
+                    <textarea id="appComment" name="appComment" placeholder="Например: Хочу задать вопрос про мотивацию к учёбе"></textarea>
+                </div>
+
+                <button type="submit" class="btn" id="applicationBtn">Подать заявку</button>
+            </form>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Отправка данных...</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            ✅ Спасибо! Ваша заявка успешно отправлена!
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            ❌ Произошла ошибка при отправке. Попробуйте ещё раз.
+        </div>
+
+        <div class="debug-message" id="debugMessage">
+            🐛 Отладочная информация будет здесь
+        </div>
+    </div>
+
+    <script>
+        // Настройки Telegram бота
+        const TELEGRAM_BOT_TOKEN = '8299176792:AAGjAJn3IIrmrHNU9O_EGX5dhrHrmF_LGrk';
+        const TELEGRAM_CHAT_ID = '8299176792';
+
+        // Установка минимальной даты на завтра
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dateString = tomorrow.toISOString().split('T')[0];
+        document.getElementById('date').value = dateString;
+
+        // Функция отправки сообщения в Telegram
+        async function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            
+            console.log('Отправка сообщения:', { url, chat_id: TELEGRAM_CHAT_ID, message });
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+                
+                console.log('Ответ сервера:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Ошибка ответа:', errorText);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Успешный ответ:', data);
+                
+                return true;
+            } catch (error) {
+                console.error('Ошибка отправки:', error);
+                return false;
+            }
+        }
+
+        // Функция форматирования данных для вопроса
+        function formatQuestionData(formData) {
+            return `🔔 <b>Новый вопрос дня</b>
+
+👤 <b>Автор:</b> ${formData.get('author')}
+
+❓ <b>Вопрос:</b>
+${formData.get('question')}
+
+🔎 <b>Контекст:</b>
+${formData.get('context')}
+
+✅ <b>Что хочет услышать:</b>
+${formData.get('expectation')}
+
+📅 <b>Дата:</b> ${formData.get('date') || 'Не указана'}`;
+        }
+
+        // Функция форматирования данных для заявки
+        function formatApplicationData(formData) {
+            return `📋 <b>Новая заявка в очередь</b>
+
+👤 <b>Имя:</b> ${formData.get('appAuthor')}
+
+📧 <b>Email:</b> ${formData.get('appEmail') || 'Не указан'}
+
+💬 <b>Комментарий:</b>
+${formData.get('appComment') || 'Нет комментариев'}`;
+        }
+
+        // Показать загрузку
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // Скрыть загрузку
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Показать сообщение об успехе
+        function showSuccessMessage() {
+            document.getElementById('successMessage').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 3000);
+        }
+
+        // Показать сообщение об ошибке
+        function showErrorMessage() {
+            document.getElementById('errorMessage').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('errorMessage').style.display = 'none';
+            }, 5000);
+        }
+
+        // Показать отладочное сообщение
+        function showDebugMessage(message) {
+            const debugElement = document.getElementById('debugMessage');
+            debugElement.innerHTML = `🐛 ${message}`;
+            debugElement.style.display = 'block';
+            setTimeout(() => {
+                debugElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Обработка формы вопроса
+        document.getElementById('questionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('questionBtn');
+            btn.disabled = true;
+            btn.textContent = 'Отправка...';
+            
+            showLoading();
+            showDebugMessage('Подготовка данных для отправки...');
+            
+            const formData = new FormData(this);
+            const message = formatQuestionData(formData);
+            
+            showDebugMessage('Отправка сообщения в Telegram...');
+            const success = await sendToTelegram(message);
+            
+            hideLoading();
+            
+            if (success) {
+                showSuccessMessage();
+                this.reset();
+                document.getElementById('date').value = dateString;
+                showDebugMessage('Сообщение успешно отправлено!');
+            } else {
+                showErrorMessage();
+                showDebugMessage('Ошибка отправки сообщения!');
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Отправить вопрос';
+        });
+
+        // Обработка формы заявки
+        document.getElementById('applicationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('applicationBtn');
+            btn.disabled = true;
+            btn.textContent = 'Отправка...';
+            
+            showLoading();
+            showDebugMessage('Подготовка данных для отправки...');
+            
+            const formData = new FormData(this);
+            const message = formatApplicationData(formData);
+            
+            showDebugMessage('Отправка сообщения в Telegram...');
+            const success = await sendToTelegram(message);
+            
+            hideLoading();
+            
+            if (success) {
+                showSuccessMessage();
+                this.reset();
+                showDebugMessage('Сообщение успешно отправлено!');
+            } else {
+                showErrorMessage();
+                showDebugMessage('Ошибка отправки сообщения!');
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Подать заявку';
+        });
+
+        // Проверка токена бота при загрузке страницы
+        window.addEventListener('load', async function() {
+            console.log('Проверка токена бота...');
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getMe`);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Бот активен:', data.result.username);
+                } else {
+                    console.error('Ошибка проверки токена:', response.status);
+                }
+            } catch (error) {
+                console.error('Ошибка проверки токена:', error);
+            }
+        });
+    </script>
+</body>
+</html>
