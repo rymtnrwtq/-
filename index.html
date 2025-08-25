@@ -204,7 +204,7 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
-            background: white;
+            background-color: white;
         }
 
         .date-option:hover:not(.disabled) {
@@ -223,6 +223,16 @@
             color: #a0aec0;
             cursor: not-allowed;
             opacity: 0.6;
+        }
+
+        .date-option.disabled:hover {
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 0 0 2px #e2e8f0;
+        }
+
+        .date-option.selected:hover {
+            border: 2px solid #4a5568;
+            box-shadow: 0 0 0 2px #4a5568;
         }
 
         .date-option .day {
