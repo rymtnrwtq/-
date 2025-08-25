@@ -69,7 +69,7 @@
             color: #2d3748;
         }
 
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e2e8f0;
@@ -78,7 +78,7 @@
             transition: border-color 0.3s ease;
         }
 
-        input:focus, textarea:focus {
+        input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -144,20 +144,6 @@
             display: none;
         }
 
-        .debug-message {
-            background: #fff3cd;
-            color: #856404;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: left;
-            margin-top: 20px;
-            display: none;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
         .loading {
             display: none;
             text-align: center;
@@ -201,6 +187,50 @@
             color: #4a5568;
         }
 
+        .date-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .date-option {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .date-option:hover:not(.disabled) {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+
+        .date-option.selected {
+            background-color: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .date-option.disabled {
+            background-color: #f1f1f1;
+            color: #a0aec0;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .date-option .day {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .date-option .date {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -209,6 +239,20 @@
             
             h1 {
                 font-size: 2em;
+            }
+            
+            .date-selector {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .date-selector {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            
+            .date-option {
+                padding: 8px 5px;
             }
         }
     </style>
@@ -233,54 +277,34 @@
             <h2 class="form-title">📝 Задать вопрос дня</h2>
             <form id="questionForm">
                 <div class="form-group">
-                    <label for="author">Ваше имя <span class="required">*</span></label>
-                    <input type="text" id="author" name="author" required>
+                    <label for="telegram">Ссылка на Telegram <span class="required">*</span></label>
+                    <input type="text" id="telegram" name="telegram" placeholder="https://t.me/username или @username" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="question">Вопрос (1–2 предложения) <span class="required">*</span></label>
-                    <textarea id="question" name="question" placeholder="Например: Как вы справлялись с тревожностью перед началом учёбы?" required></textarea>
+                    <label for="question">Вопрос <span class="required">*</span></label>
+                    <textarea id="question" name="question" placeholder="Ваш вопрос (1–2 предложения)" required></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="context">Контекст (зачем вам это нужно) <span class="required">*</span></label>
-                    <textarea id="context" name="context" placeholder="Например: Готовлюсь к ВУЗу, немного боюсь нагрузки." required></textarea>
+                    <label for="context">Зачем вам это нужно? <span class="required">*</span></label>
+                    <textarea id="context" name="context" placeholder="Контекст вопроса" required></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="expectation">Что вы хотите услышать от других? <span class="required">*</span></label>
-                    <textarea id="expectation" name="expectation" placeholder="Например: Личный опыт, советы, что помогло" required></textarea>
+                    <textarea id="expectation" name="expectation" placeholder="Что хотели бы узнать" required></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="date">Дата, на которую назначается вопрос</label>
-                    <input type="date" id="date" name="date">
+                    <label>Выберите дату <span class="required">*</span></label>
+                    <div class="date-selector" id="dateSelector">
+                        <!-- Даты будут генерироваться здесь -->
+                    </div>
+                    <input type="hidden" id="selectedDate" name="selectedDate" required>
                 </div>
 
                 <button type="submit" class="btn" id="questionBtn">Отправить вопрос</button>
-            </form>
-        </div>
-
-        <!-- Форма подачи заявки -->
-        <div class="form-section">
-            <h2 class="form-title">📋 Подать заявку в очередь</h2>
-            <form id="applicationForm">
-                <div class="form-group">
-                    <label for="appAuthor">Ваше имя <span class="required">*</span></label>
-                    <input type="text" id="appAuthor" name="appAuthor" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="appEmail">Email (для уведомлений)</label>
-                    <input type="email" id="appEmail" name="appEmail">
-                </div>
-
-                <div class="form-group">
-                    <label for="appComment">Комментарий (по желанию)</label>
-                    <textarea id="appComment" name="appComment" placeholder="Например: Хочу задать вопрос про мотивацию к учёбе"></textarea>
-                </div>
-
-                <button type="submit" class="btn" id="applicationBtn">Подать заявку</button>
             </form>
         </div>
 
@@ -290,15 +314,11 @@
         </div>
 
         <div class="success-message" id="successMessage">
-            ✅ Спасибо! Ваша заявка успешно отправлена!
+            ✅ Спасибо! Ваш вопрос успешно отправлен!
         </div>
 
         <div class="error-message" id="errorMessage">
             ❌ Произошла ошибка при отправке. Попробуйте ещё раз.
-        </div>
-
-        <div class="debug-message" id="debugMessage">
-            🐛 Отладочная информация будет здесь
         </div>
     </div>
 
@@ -307,12 +327,49 @@
         const TELEGRAM_BOT_TOKEN = '8299176792:AAGjAJn3IIrmrHNU9O_EGX5dhrHrmF_LGrk';
         const TELEGRAM_CHAT_ID = '7802251986'; // Ваш личный ID
 
-        // Установка минимальной даты на завтра
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const dateString = tomorrow.toISOString().split('T')[0];
-        document.getElementById('date').value = dateString;
+        // Занятые даты (в реальном приложении это будет храниться на сервере)
+        const occupiedDates = new Set();
+
+        // Генерация календаря на 14 дней вперёд
+        function generateDateSelector() {
+            const dateSelector = document.getElementById('dateSelector');
+            dateSelector.innerHTML = '';
+            
+            const today = new Date();
+            
+            for (let i = 1; i <= 14; i++) {
+                const date = new Date();
+                date.setDate(today.getDate() + i);
+                
+                const dateStr = date.toISOString().split('T')[0];
+                const day = date.toLocaleDateString('ru-RU', { weekday: 'short' });
+                const dateNum = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'numeric' });
+                
+                const dateOption = document.createElement('div');
+                dateOption.className = 'date-option';
+                dateOption.innerHTML = `
+                    <div class="day">${day}</div>
+                    <div class="date">${dateNum}</div>
+                `;
+                
+                // Проверяем, занята ли дата
+                if (occupiedDates.has(dateStr)) {
+                    dateOption.classList.add('disabled');
+                } else {
+                    dateOption.addEventListener('click', () => {
+                        // Убираем выделение с других дат
+                        document.querySelectorAll('.date-option').forEach(option => {
+                            option.classList.remove('selected');
+                        });
+                        // Выделяем выбранную дату
+                        dateOption.classList.add('selected');
+                        document.getElementById('selectedDate').value = dateStr;
+                    });
+                }
+                
+                dateSelector.appendChild(dateOption);
+            }
+        }
 
         // Функция отправки сообщения в Telegram
         async function sendToTelegram(message) {
@@ -344,34 +401,40 @@
             }
         }
 
-        // Функция форматирования данных для вопроса
-        function formatQuestionData(formData) {
-            return `🔔 <b>Новый вопрос дня</b>
-
-👤 <b>Автор:</b> ${formData.get('author')}
-
-❓ <b>Вопрос:</b>
-${formData.get('question')}
-
-🔎 <b>Контекст:</b>
-${formData.get('context')}
-
-✅ <b>Что хочет услышать:</b>
-${formData.get('expectation')}
-
-📅 <b>Дата:</b> ${formData.get('date') || 'Не указана'}`;
+        // Функция форматирования Telegram ссылки
+        function formatTelegramLink(telegram) {
+            if (telegram.startsWith('https://t.me/')) {
+                const username = telegram.replace('https://t.me/', '');
+                return `<a href="${telegram}">@${username}</a>`;
+            } else if (telegram.startsWith('@')) {
+                return `<a href="https://t.me/${telegram.substring(1)}">${telegram}</a>`;
+            } else {
+                return `<a href="https://t.me/${telegram}">@${telegram}</a>`;
+            }
         }
 
-        // Функция форматирования данных для заявки
-        function formatApplicationData(formData) {
-            return `📋 <b>Новая заявка в очередь</b>
+        // Функция форматирования данных для вопроса
+        function formatQuestionData(formData) {
+            const telegramLink = formatTelegramLink(formData.get('telegram'));
+            const selectedDate = formData.get('selectedDate');
+            const dateObj = new Date(selectedDate);
+            const formattedDate = dateObj.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            
+            return `#ВопросДня
 
-👤 <b>Имя:</b> ${formData.get('appAuthor')}
+❓ Вопрос от ${telegramLink} на ${formattedDate}
 
-📧 <b>Email:</b> ${formData.get('appEmail') || 'Не указан'}
+<b>${formData.get('question')}</b>
 
-💬 <b>Комментарий:</b>
-${formData.get('appComment') || 'Нет комментариев'}`;
+🔎 Зачем это нужно:
+${formData.get('context')}
+
+✅ Что хочу услышать:
+${formData.get('expectation')}`;
         }
 
         // Показать загрузку
@@ -406,6 +469,12 @@ ${formData.get('appComment') || 'Нет комментариев'}`;
         document.getElementById('questionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const selectedDate = document.getElementById('selectedDate').value;
+            if (!selectedDate) {
+                alert('Пожалуйста, выберите дату');
+                return;
+            }
+            
             const btn = document.getElementById('questionBtn');
             btn.disabled = true;
             btn.textContent = 'Отправка...';
@@ -420,8 +489,13 @@ ${formData.get('appComment') || 'Нет комментариев'}`;
             
             if (success) {
                 showSuccessMessage();
+                // Добавляем дату в занятые
+                occupiedDates.add(selectedDate);
+                // Перегенерируем календарь
+                generateDateSelector();
+                // Сбрасываем форму
                 this.reset();
-                document.getElementById('date').value = dateString;
+                document.getElementById('selectedDate').value = '';
             } else {
                 showErrorMessage();
             }
@@ -430,36 +504,9 @@ ${formData.get('appComment') || 'Нет комментариев'}`;
             btn.textContent = 'Отправить вопрос';
         });
 
-        // Обработка формы заявки
-        document.getElementById('applicationForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const btn = document.getElementById('applicationBtn');
-            btn.disabled = true;
-            btn.textContent = 'Отправка...';
-            
-            showLoading();
-            
-            const formData = new FormData(this);
-            const message = formatApplicationData(formData);
-            const success = await sendToTelegram(message);
-            
-            hideLoading();
-            
-            if (success) {
-                showSuccessMessage();
-                this.reset();
-            } else {
-                showErrorMessage();
-            }
-            
-            btn.disabled = false;
-            btn.textContent = 'Подать заявку';
-        });
-
-        // Проверка токена бота при загрузке страницы
-        window.addEventListener('load', async function() {
-            console.log('Проверка токена бота...');
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            generateDateSelector();
         });
     </script>
 </body>
