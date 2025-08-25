@@ -324,13 +324,13 @@
 
     <script>
         // Настройки GitHub
-        const GITHUB_TOKEN = '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'; // Замените на ваш GitHub token
-        const GITHUB_REPO = 'rymtnrwtq/-'; // Замените на ваш репозиторий
+        const GITHUB_TOKEN = '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';
+        const GITHUB_REPO = 'BorozdovNikita/vopros-dnya';
         const GITHUB_FILE = 'occupied-dates.json';
 
         // Настройки Telegram бота
         const TELEGRAM_BOT_TOKEN = '8299176792:AAGjAJn3IIrmrHNU9O_EGX5dhrHrmF_LGrk';
-        const TELEGRAM_CHAT_ID = '7802251986'; // Ваш личный ID
+        const TELEGRAM_CHAT_ID = '7802251986';
 
         // Занятые даты
         let occupiedDates = new Set();
@@ -340,19 +340,25 @@
             try {
                 const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
                     headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`
+                        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
                     }
                 });
                 
                 if (response.ok) {
                     const data = await response.json();
-                    const content = atob(data.content); // Декодируем base64
+                    const content = atob(data.content);
                     const datesArray = JSON.parse(content);
                     occupiedDates = new Set(datesArray);
+                    console.log('Загружены занятые даты:', datesArray);
+                } else if (response.status === 404) {
+                    console.log('Файл не найден, используем пустой список');
+                    occupiedDates = new Set();
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
             } catch (error) {
-                console.log('Не удалось загрузить занятые даты:', error);
-                // Если файл не существует, продолжаем с пустым набором
+                console.error('Ошибка загрузки занятых дат:', error);
                 occupiedDates = new Set();
             }
         }
@@ -360,42 +366,62 @@
         // Сохранение занятых дат в GitHub
         async function saveOccupiedDate(date) {
             try {
-                // Получаем текущую информацию о файле (нужна для SHA)
+                // Получаем текущую информацию о файле
                 let sha = null;
+                let currentContent = '[]';
+                
                 try {
                     const fileInfo = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
                         headers: {
-                            'Authorization': `token ${GITHUB_TOKEN}`
+                            'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json'
                         }
                     });
                     
                     if (fileInfo.ok) {
                         const fileInfoData = await fileInfo.json();
                         sha = fileInfoData.sha;
+                        currentContent = atob(fileInfoData.content);
                     }
                 } catch (error) {
                     console.log('Файл не существует, будет создан новый');
                 }
                 
-                // Добавляем новую дату
-                occupiedDates.add(date);
-                const datesArray = Array.from(occupiedDates);
+                // Парсим текущий контент и добавляем новую дату
+                let datesArray = [];
+                try {
+                    datesArray = JSON.parse(currentContent);
+                } catch (e) {
+                    datesArray = [];
+                }
+                
+                if (!datesArray.includes(date)) {
+                    datesArray.push(date);
+                }
                 
                 // Сохраняем файл
                 const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         message: `Add occupied date: ${date}`,
-                        content: btoa(JSON.stringify(datesArray, null, 2)), // Кодируем в base64
-                        sha: sha // SHA нужна для обновления существующего файла
+                        content: btoa(JSON.stringify(datesArray, null, 2)),
+                        sha: sha
                     })
                 });
                 
-                return response.ok;
+                if (response.ok) {
+                    occupiedDates = new Set(datesArray);
+                    console.log('Дата успешно сохранена:', date);
+                    return true;
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(`GitHub API error: ${errorData.message}`);
+                }
             } catch (error) {
                 console.error('Ошибка сохранения даты:', error);
                 return false;
@@ -530,10 +556,12 @@ ${formData.get('expectation')}`;
         }
 
         // Показать сообщение об ошибке
-        function showErrorMessage() {
-            document.getElementById('errorMessage').style.display = 'block';
+        function showErrorMessage(message = '❌ Произошла ошибка при отправке. Попробуйте ещё раз.') {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.innerHTML = message;
+            errorElement.style.display = 'block';
             setTimeout(() => {
-                document.getElementById('errorMessage').style.display = 'none';
+                errorElement.style.display = 'none';
             }, 5000);
         }
 
@@ -571,13 +599,13 @@ ${formData.get('expectation')}`;
                     this.reset();
                     document.getElementById('selectedDate').value = '';
                 } else {
-                    showErrorMessage();
+                    showErrorMessage('Ошибка отправки в Telegram');
                     // Откатываем сохранение даты в случае ошибки отправки в Telegram
                     occupiedDates.delete(selectedDate);
                 }
             } else {
                 hideLoading();
-                showErrorMessage();
+                showErrorMessage('Ошибка сохранения даты в GitHub. Проверьте токен и права доступа.');
             }
             
             btn.disabled = false;
